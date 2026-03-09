@@ -41,12 +41,72 @@
  */
 export function createTiffinPlan({ name, mealType = "veg", days = 30 } = {}) {
   // Your code here
+  if (
+    typeof name !== "string" ||
+    name === undefined ||
+    name === null ||
+    name === ""
+  ) {
+    return null;
+  }
+  let dailyRate;
+  if (mealType === "veg") {
+    dailyRate = 80;
+  } else if (mealType === "nonveg") {
+    dailyRate = 120;
+  } else if (mealType === "jain") {
+    dailyRate = 90;
+  } else {
+    return null;
+  }
+
+  return { name, mealType, days, dailyRate, totalCost: dailyRate * days };
 }
 
 export function combinePlans(...plans) {
   // Your code here
+  if (plans.length === 0) {
+    return null;
+  }
+  let totalRevenue = 0;
+  let mealBreakdown = {};
+  for (let i = 0; i < plans.length; i++) {
+    let plan = plans[i];
+    totalRevenue += plan.totalCost;
+    let meal = plan.mealType;
+    if (Object.hasOwn(mealBreakdown, meal)) {
+      mealBreakdown[meal] += 1;
+    } else {
+      mealBreakdown[meal] = 1;
+    }
+  }
+  let obj = {
+    totalCustomers: plans.length,
+    totalRevenue,
+    mealBreakdown,
+  };
+  return obj;
 }
 
 export function applyAddons(plan, ...addons) {
   // Your code here
+  if (
+    plan === null ||
+    typeof plan !== "object" ||
+    plan.length === 0
+  ) {
+    return null;
+  }
+  const newObj = structuredClone(plan);
+  newObj.addonNames = [];
+  let newDailyRate = newObj.dailyRate;
+  for (let i = 0; i < addons.length; i++) {
+    newObj.addonNames.push(addons[i].name);
+    newDailyRate += addons[i].price;
+  }
+
+  let finalPrice = newDailyRate * newObj.days;
+  newObj.dailyRate = newDailyRate;
+  newObj.totalCost = finalPrice;
+  return newObj;
 }

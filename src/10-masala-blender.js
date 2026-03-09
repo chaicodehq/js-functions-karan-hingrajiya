@@ -54,28 +54,67 @@
  */
 export function pipe(...fns) {
   // Your code here
+  if (fns.length === 0) {
+    return (elem) => elem;
+  }
+
+  return function (obj) {
+    return fns.reduce((acc, fn) => {
+      return fn(acc);
+    }, obj);
+  };
 }
 
 export function compose(...fns) {
   // Your code here
+  if (fns.length === 0) {
+    return (elem) => elem;
+  }
+
+  return function (obj) {
+    return fns.reduceRight((acc, fn) => {
+      return fn(acc);
+    }, obj);
+  };
 }
 
 export function grind(spice) {
   // Your code here
+  return { ...spice, form: "powder" };
 }
 
 export function roast(spice) {
   // Your code here
+  return { ...spice, roasted: true, aroma: "strong" };
 }
 
 export function mix(spice) {
   // Your code here
+  return { ...spice, mixed: true };
 }
 
 export function pack(spice) {
   // Your code here
+  return { ...spice, packed: true, label: `${spice.name} Masala` };
 }
 
 export function createRecipe(steps) {
   // Your code here
+  if (!Array.isArray(steps) || steps.length === 0) return (elem) => elem;
+
+  // i completly forgot i can use pipe func here that i made earlier
+
+  let stepFuncObj = { grind, roast, mix, pack };
+  //i took little bit of AI help to process this whole but i understand the code overall.
+
+  let finalResfuncs = steps
+    .filter((step) => {
+      if (Object.hasOwn(stepFuncObj, step)) return true;
+      else return false;
+    })
+    .map((step) => {
+      return stepFuncObj[step];
+    });
+
+  return pipe(...finalResfuncs);
 }

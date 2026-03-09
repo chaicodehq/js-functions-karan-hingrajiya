@@ -65,16 +65,132 @@
  */
 export function createElection(candidates) {
   // Your code here
+  const votersIdArr = [];
+  const registeredVotersSet = new Set();
+  const isVoted = [];
+  const voteCount = new Map();
+  function registerVoter(voter) {
+    if (
+      typeof voter !== "object" ||
+      voter === null ||
+      Object.keys(voter).length === 0 ||
+      voter.age < 18
+    )
+      return false;
+    if (votersIdArr.includes(voter.id)) {
+      return false;
+    } else {
+      votersIdArr.push(voter.id);
+      registeredVotersSet.add(voter);
+      return true;
+    }
+  }
+
+  function castVote(voterId, candidateId, onSuccess, onError) {
+    let isCandidateValid = false;
+    for (let i = 0; i < candidates.length; i++) {
+      if (candidates[i].id === candidateId) {
+        isCandidateValid = true;
+        break;
+      }
+    }
+
+    let isVoterValid = votersIdArr.includes(voterId);
+    if (isVoterValid && isCandidateValid && !isVoted.includes(voterId)) {
+      isVoted.push(voterId);
+      let currVoteObj = candidates.find((elem) => elem.id === candidateId);
+      voteCount.set(
+        currVoteObj.party,
+        (voteCount.get(currVoteObj.party) || 0) + 1,
+      );
+      return onSuccess({ voterId, candidateId });
+    } else {
+      return onError("reason String");
+    }
+  }
+
+  function getResults(sortFn) {
+    let res = [];
+
+    candidates.forEach((elem) => {
+      let votes = voteCount.get(elem.party) || 0;
+      let obj = {
+        id: elem.id,
+        name: elem.name,
+        party: elem.party,
+        votes,
+      };
+      res.push(obj);
+    });
+    if (sortFn !== undefined) {
+      return res.sort(sortFn);
+    } else {
+      return res.sort((a, b) => {
+        return b.votes - a.votes;
+      });
+    }
+  }
+
+  function getWinner() {
+    if (registeredVotersSet.size === 0 || voteCount.size === 0) return null;
+
+    let sortedVotes = [...voteCount].sort((a, b) => b[1] - a[1]);
+    return candidates.find((elem) => {
+      return elem.party === sortedVotes[0][0];
+    });
+  }
+
+  return {
+    registerVoter,
+    castVote,
+    getResults,
+    getWinner,
+  };
 }
 
 export function createVoteValidator(rules) {
   // Your code here
+  return function (obj) {
+    let valid = true;
+    let reason = "";
+    let fields = rules.requiredFields;
+    let objfields = Object.keys(obj);
+    for (let i = 0; i < fields.length; i++) {
+      if (!objfields.includes(fields[i])) {
+        valid = false;
+        reason = "fields are not sufficient";
+        break;
+      }
+    }
+
+    if (obj.age < rules.minAge) {
+      valid = false;
+      reason = "age must be valid";
+    }
+    // valid = true;
+    return {
+      valid,
+      reason,
+    };
+  };
 }
 
 export function countVotesInRegions(regionTree) {
   // Your code here
+  if (typeof regionTree !== "object" || regionTree === null) return 0;
+
+  let countVote = regionTree.votes;
+  for (let i = 0; i < regionTree.subRegions.length; i++) {
+    let currObj = regionTree.subRegions[i];
+    countVote += countVotesInRegions(currObj);
+  }
+
+  return countVote;
 }
 
 export function tallyPure(currentTally, candidateId) {
   // Your code here
+  let resObj = { ...currentTally };
+  resObj[candidateId] = (resObj[candidateId] || 0) + 1;
+  return resObj;
 }

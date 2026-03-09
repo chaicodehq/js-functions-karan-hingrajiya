@@ -50,4 +50,68 @@
  */
 export function createDabbawala(name, area) {
   // Your code here
+  let id = 1;
+  let deliveryArr = [];
+  return {
+    addDelivery(from, to) {
+      if (!from || !to || from === "" || to === "") {
+        return -1;
+      }
+      deliveryArr.push({
+        id,
+        from,
+        to,
+        status: "pending",
+      });
+      return id++;
+    },
+
+    completeDelivery(deliveryID) {
+      let res = false;
+      deliveryArr.forEach((elem) => {
+        if (elem.id === deliveryID && elem.status === "pending") {
+          elem.status = "completed";
+          res = true;
+        }
+      });
+      return res;
+    },
+
+    getActiveDeliveries() {
+      return deliveryArr
+        .filter((elem) => {
+          return elem.status === "pending";
+        })
+        .map((elem) => {
+          return { ...elem }; //bcz its told in requirement in question to clone or copies the array of objects 
+        });
+    },
+
+    getStats() {
+      let completed = 0;
+      let pending = 0;
+      let total = deliveryArr.length;
+      deliveryArr.forEach((elem) => {
+        if (elem.status === "pending") pending++;
+        else if (elem.status === "completed") completed++;
+      });
+      let successRate = `${((completed / total) * 100).toFixed(2)}%`;
+      if (total === 0) successRate = "0.00%";
+
+      return {
+        name,
+        area,
+        total,
+        completed,
+        pending,
+        successRate,
+      };
+    },
+
+    reset() {
+      deliveryArr = [];
+      id = 1;
+      return true;
+    },
+  };
 }

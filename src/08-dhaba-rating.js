@@ -46,16 +46,61 @@
  */
 export function createFilter(field, operator, value) {
   // Your code here
+
+  return function (obj) {
+    if (operator === "<") return obj[field] < value;
+    else if (operator === ">") return obj[field] > value;
+    else if (operator === "<=") return obj[field] <= value;
+    else if (operator === ">=") return obj[field] >= value;
+    else if (operator === "===") return obj[field] === value;
+    else return false;
+  };
 }
 
 export function createSorter(field, order = "asc") {
   // Your code here
+  if (order === "asc") {
+    return function (a, b) {
+      // return objectArr.sort((a, b) => {
+      if (typeof a[field] === "number") {
+        return a[field] - b[field];
+      }
+      return a[field].localeCompare(b[field]);
+      // });
+    };
+  } else if (order === "desc") {
+    return function (a, b) {
+      // return objectArr.sort((a, b) => {
+      if (typeof a[field] === "number") {
+        return b[field] - a[field];
+      }
+      return b[field].localeCompare(a[field]);
+      // });
+    };
+  }
 }
 
 export function createMapper(fields) {
   // Your code here
+  if (!Array.isArray(fields)) return [];
+
+  return function (obj) {
+    let resObj = {};
+    for (let i = 0; i < fields.length; i++) {
+      let curr = fields[i];
+      if (Object.hasOwn(obj, curr)) {
+        resObj[curr] = obj[curr];
+      }
+    }
+    return resObj;
+  };
 }
 
 export function applyOperations(data, ...operations) {
-  // Your code here
+  // i did the logic my self no AI here it feels good to solved it.
+  if (!Array.isArray(data)) return [];
+
+  return operations.reduce((acc, func) => {
+    return func(acc);
+  }, data);
 }

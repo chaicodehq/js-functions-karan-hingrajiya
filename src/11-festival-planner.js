@@ -50,4 +50,72 @@
  */
 export function createFestivalManager() {
   // Your code here
+  // const festivalObjMap = new Map();
+  const festivals = [];
+  function addFestival(name, date, type) {
+    if (typeof name !== "string" || name === "" || typeof date !== "string")
+      return -1;
+
+    if (type === "religious" || type === "cultural" || type === "national") {
+      let isName = festivals.some((elem) => {
+        return elem.name === name;
+      });
+      if (isName) return -1;
+      else festivals.push({ name, date, type });
+    } else {
+      return -1;
+    }
+
+    return festivals.length;
+  }
+
+  function removeFestival(name) {
+    let idx = -1;
+    for (let i = 0; i < festivals.length; i++) {
+      if (festivals[i].name === name) idx = i;
+      break;
+    }
+    if (idx !== -1) {
+      festivals.splice(idx, 1);
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  function getAll() {
+    let copyArr = [];
+    festivals.forEach((elem) => copyArr.push({ ...elem }));
+    return copyArr;
+  }
+
+  function getByType(type) {
+    return festivals.filter((elem) => elem.type === type);
+  }
+
+  function getUpcoming(currentDate, n = 3) {
+    let finalArr = festivals
+      .filter((elem) => {
+        return elem.date >= currentDate;
+      })
+      .sort((a, b) => {
+        return new Date(a.date) - new Date(b.date); //asc order in date
+      });
+
+    finalArr.splice(n);
+    return finalArr;
+  }
+
+  function getCount() {
+    return festivals.length;
+  }
+
+  return {
+    addFestival,
+    removeFestival,
+    getAll,
+    getByType,
+    getUpcoming,
+    getCount,
+  };
 }
